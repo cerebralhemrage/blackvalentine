@@ -48,6 +48,7 @@ body {
 
 /* ─── CUSTOM CURSOR GLOW ─── */
 .cursor-glow {
+  display: none; /* replaced by darkness/flashlight */
   position: fixed;
   width: 220px;
   height: 220px;
@@ -284,8 +285,6 @@ body {
   48%{ opacity: 0.55; transform: scale(1.01); }
   52%{ opacity: 0.28; transform: scale(0.995); }
 }
-  50% { box-shadow: 0 0 80px rgba(212,205,196,0.35), 0 0 150px rgba(212,205,196,0.2), 0 0 250px rgba(212,205,196,0.1), inset -20px -10px 40px rgba(0,0,0,0.4); }
-}
 
 .moon-halo{
   position: absolute;
@@ -321,8 +320,6 @@ body {
   0%, 100%{ transform: translate(-50%,-50%) scale(1) rotate(0deg); opacity: 0.28; }
   48%{ transform: translate(-50%,-50%) scale(1.02) rotate(6deg); opacity: 0.44; }
   55%{ transform: translate(-50%,-50%) scale(0.995) rotate(-4deg); opacity: 0.22; }
-}
-  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .moon-title {
@@ -469,6 +466,11 @@ body {
 .raven-container {
   text-align: center;
   max-width: 700px;
+  cursor: pointer;
+}
+.raven-container:focus-visible{
+  outline: 1px solid rgba(212,205,196,0.22);
+  outline-offset: 10px;
 }
 
 .raven-svg {
@@ -754,8 +756,35 @@ body.entered #darkMask{ opacity: var(--mask-opacity, 1); }
   user-select: none;
   opacity: 0;
   transition: opacity 1.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 body.entered #hud{ opacity: 1; }
+
+#soundToggle{
+  background: rgba(10,10,15,0.35);
+  border: 1px solid rgba(212,205,196,0.16);
+  color: rgba(212,205,196,0.62);
+  padding: 7px 10px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 200ms ease, color 200ms ease, transform 200ms ease, background 200ms ease;
+}
+#soundToggle:hover{
+  transform: translateY(-1px);
+  border-color: rgba(212,205,196,0.32);
+  color: rgba(212,205,196,0.85);
+  background: rgba(10,10,15,0.45);
+}
+#soundToggle[aria-pressed="true"]{
+  border-color: rgba(212,205,196,0.42);
+  color: rgba(212,205,196,0.90);
+}
+
 
 .relic{
   cursor: pointer;
@@ -964,10 +993,12 @@ body.sealed .relic{
 <div class="grain"></div>
 <div class="fog-layer fog-1"></div>
 <div class="fog-layer fog-2"></div>
-<div class="cursor-glow" id="cursorGlow"></div>
 <div id="darkMask" aria-hidden="true"></div>
 <div id="sealOverlay" aria-hidden="true"></div>
-<div id="hud" aria-hidden="true"><span id="evidenceCount">EVIDENCE 0/8</span></div>
+<div id="hud" aria-hidden="true">
+  <span id="evidenceCount">RELICS 0/8</span>
+  <button id="soundToggle" type="button" aria-pressed="false" aria-label="Toggle sound">SOUND: OFF</button>
+</div>
 
 <!-- Entrance Gate -->
 <div class="gate-overlay" id="gate">
@@ -992,8 +1023,8 @@ body.sealed .relic{
       <div class="moon-halo"></div>
       <div class="moon"></div>
     </div>
-    <h1 class="moon-title reveal reveal-delay-1">To Brandon Wakeley</h1>
-    <p class="moon-subtitle reveal reveal-delay-2">A vow spoken low, in the hour when pumpkin vines breathe and the treeline refuses to blink.</p>
+    <h1 class="moon-title reveal reveal-delay-1">To My Favorite Darkness</h1>
+    <p class="moon-subtitle reveal reveal-delay-2">A vow spoken softly, for the one who never flinches when the world goes wrong.</p>
     <div class="scroll-indicator">
       <span>Descend</span>
       <div class="scroll-arrow"></div>
@@ -1011,11 +1042,10 @@ body.sealed .relic{
   <section class="poetry-section">
     <div class="poetry-content">
       <div class="poetry-number reveal">Chapter One</div>
-      <h2 class="poetry-heading reveal reveal-delay-1">The Midnight Ribbon</h2>
+      <h2 class="poetry-heading reveal reveal-delay-1">The Black Ribbon</h2>
       <p class="poetry-text reveal reveal-delay-2">
-                When the world dresses itself in sweetness and calls it love, my thoughts turn instead to you — <em class="candle-word">Brandon Wakeley</em> — whose companionship has always been truer than any bright, obedient thing.<br><br>
-        How long since we first fastened that wild, <span class="relic" data-relic="A knot of black twine—warm from a pocket, damp with river-fog.">midnight ribbon</span> around our wrists and understood we should not be parted? We were bound then — not by convenience or a neat little oath — but by some older magnetism. The kind that pulls two souls toward the same <span class="relic" data-relic="The latch is cold. The wood is scratched from the inside.">threshold</span>, where others hesitate.<br><br>
-        And when the world gets nervous and tells us not to look, we look anyway — careful, laughing, collecting <span class="relic" data-relic="A handful of pale pumpkin seeds, too clean for the soil they came from.">seeds</span> of evidence like prayers we never say out loud.
+                When the world dresses itself in sweetness and calls it love, I think of you — <em class="candle-word">Brandon</em> — the truer thing. The one who never asked me to be bright, or easy, or harmless.<br><br>
+How long since we first tied that <span class="relic" data-relic="A knot of black twine—warm from a pocket, damp with river-fog.">black ribbon</span> between us, not as a promise of goodness, but as an agreement to be honest? We were bound — not by convenience, not by a neat little oath — but by a gravity older than manners. The kind that pulls two souls toward the same locked <span class="relic" data-relic="The latch is cold. The wood is scratched from the inside.">door</span>… and makes them smile.
       </p>
     </div>
   </section>
@@ -1031,28 +1061,30 @@ body.sealed .relic{
   <section class="poetry-section">
     <div class="poetry-content">
       <div class="poetry-number reveal">Chapter Two</div>
-      <h2 class="poetry-heading reveal reveal-delay-1">Silhouettes Stitched to the Same Dark Street</h2>
+      <h2 class="poetry-heading reveal reveal-delay-1">Two Shapes on the Same Bad Street</h2>
       <p class="poetry-text reveal reveal-delay-2">
-                While other people run toward clean comfort, we wander into the kind of dark that smells like wet leaves and old wood and something faintly <em class="candle-word">alive</em>.<br><br>
-        Two silhouettes trading cryptid names like prayers — <span data-slot="cryptid"></span> included — as if folklore were only field notes waiting to be confirmed. A snapped branch becomes a sentence. A trail-cam flash feels like a warning. In the mud, we found <span class="relic" data-relic="A print too long, toes arranged like a question.">tracks</span> that didn’t belong to any polite animal.<br><br>
-        And every time the air turns wrong, you make me brave enough to keep walking… slow, listening, holding a <span class="relic" data-relic="A blurry photo. The background is fine. The foreground is not.">photo</span> that refuses to explain itself.
+                Other people ran toward comfort like it could save them. We walked the opposite direction and found the air <em class="candle-word">beautiful</em> when it turned heavy.<br><br>
+We learned the language of wrongness: the hush where a room should breathe, the soft pressure of being watched, the way a hallway can feel too long by exactly one step. We did not call it superstition. We called it <em class="candle-word">evidence</em> — and sometimes we called it <span data-slot="cryptid"></span> when the woods answered back.<br><br>
+When the world tries to convince us it’s empty, we listen harder. When it tells us not to look, we look anyway — slow, laughing, collecting <span class="relic" data-relic="A blurry photo. The background is fine. The foreground is not.">proof</span> like prayers we never say out loud.
       </p>
     </div>
   </section>
 
   <!-- Raven Interlude -->
   <section class="raven-section">
-    <div class="raven-container reveal">
+    <div class="raven-container reveal" id="raven" role="button" tabindex="0" aria-label="Raven interlude (click to reveal another line)">
       <svg class="raven-svg" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M50 10 C30 10, 10 25, 8 45 C6 55, 12 65, 25 68 L20 75 L30 70 L35 76 L38 69 C42 70, 46 70, 50 70 C54 70, 58 70, 62 69 L65 76 L70 70 L80 75 L75 68 C88 65, 94 55, 92 45 C90 25, 70 10, 50 10Z" fill="var(--silver-mist)" opacity="0.15"/>
         <circle cx="38" cy="35" r="2.5" fill="var(--candle)" opacity="0.7"/>
         <circle cx="62" cy="35" r="2.5" fill="var(--candle)" opacity="0.7"/>
         <path d="M46 42 L50 48 L54 42" stroke="var(--silver-mist)" stroke-width="1.5" fill="none" opacity="0.3"/>
       </svg>
-      <p class="raven-quote">
-        "Steadfast as ravens upon a lintel,<br>
-        faithful as a midnight clock<br>
-        that refuses to forget its hour."
+      <p class="raven-quote" id="ravenQuote"
+        data-quote="Faithful as a door that won’t stay shut,<br>steady as footsteps in an empty house —<br>you were always the first one I wanted beside me."
+        data-alt="Sometimes the house answers back.<br>Sometimes it learns your voice.<br>And still — I’d rather hear it with you.">
+        Faithful as a door that won’t stay shut,<br>
+        steady as footsteps in an empty house —<br>
+        you were always the first one I wanted beside me.
       </p>
     </div>
   </section>
@@ -1068,11 +1100,11 @@ body.sealed .relic{
   <section class="poetry-section">
     <div class="poetry-content">
       <div class="poetry-number reveal">Chapter Three</div>
-      <h2 class="poetry-heading reveal reveal-delay-1">The Dark Is Full</h2>
+      <h2 class="poetry-heading reveal reveal-delay-1">The Dark Is Not Empty</h2>
       <p class="poetry-text reveal reveal-delay-2">
-                There is a rare comfort in knowing another heart does not demand the world be simple. With you, I have never had to pretend the dark is empty.<br><br>
-        We both know it is <em class="candle-word">full</em> — full of old griefs that whisper, full of mysteries pressing their cool fingers to the glass, full of beauty so strange it cannot survive being named. Sometimes it leaves proof: a <span class="relic" data-relic="A feather like burned velvet, too big for any bird here.">feather</span> where no bird should be, a <span class="relic" data-relic="A tooth with a root that looks almost human. Almost.">tooth</span> tucked beneath the porch step.<br><br>
-        We have stood before the unknown and felt not terror, but <em>reverence</em>.
+                There is a rare comfort in someone who doesn’t demand the world be simple. With you, I never had to pretend the dark is nothing.<br><br>
+We both know it’s <em class="candle-word">full</em>: full of old griefs that press their faces to the glass, full of names you don’t say aloud, full of beauty so strange it feels like a threat. The unknown has leaned close to us before — and instead of begging it to stop, we stood still and let ourselves feel the awe.<br><br>
+Sometimes it leaves proof: a <span class="relic" data-relic="A feather like burned velvet, too big for any bird here.">feather</span> where no bird should be, a <span class="relic" data-relic="A tooth with a root that looks almost human. Almost.">tooth</span> tucked beneath the porch step. We do not turn away. We take inventory.
       </p>
     </div>
   </section>
@@ -1088,10 +1120,11 @@ body.sealed .relic{
   <section class="poetry-section">
     <div class="poetry-content">
       <div class="poetry-number reveal">Chapter Four</div>
-      <h2 class="poetry-heading reveal reveal-delay-1">Whose Name I Would Call First</h2>
+      <h2 class="poetry-heading reveal reveal-delay-1">The Name I Would Say First</h2>
       <p class="poetry-text reveal reveal-delay-2">
-                Should the veil ever thin — should some strange hour arrive when the air turns heavy and the unseen leans close — I know whose name I would call first: <em class="candle-word">Brandon Wakeley</em>.<br><br>
-        Not because I expect rescue, but because I would rather face the <em class="candle-word">inexplicable</em> beside you than behold the safest day alone. If something steps out of the treeline and the air tastes like <span class="relic" data-relic="Metal on the tongue—like a coin you shouldn’t have swallowed.">iron</span>, let it find us holding steady — stubborn enough to look, kind enough to stay.
+                If the air ever thickens again — if a certain hour arrives and the <span class="relic" data-relic="A seam between rooms, parted just enough to stare back.">veil</span> between things goes thin — I know whose name I would say first: <em class="candle-word">Brandon Wakeley</em>.<br><br>
+Not because I expect rescue. But because I would rather face the <em class="candle-word">unspeakable</em> with you than spend one safe day feeling alone. If something is going to reach for me, let it find me holding steady — shoulder to shoulder with the person who has always understood what it means to stay.<br><br>
+If the air tastes like <span class="relic" data-relic="Metal on the tongue—like a coin you shouldn’t have swallowed.">iron</span>, if the door changes its mind behind us, if the dark starts to <span class="relic" data-relic="You can hear it: the quiet rhythm of something that isn’t your own.">breathe</span> — we do not run. We keep our place.
       </p>
     </div>
   </section>
@@ -1104,7 +1137,7 @@ body.sealed .relic{
       <div class="candle-stick"></div>
     </div>
     <p class="poetry-text reveal reveal-delay-1" style="max-width: 560px; text-align: center; font-style: italic; opacity: 0.7; font-size: clamp(0.9rem, 1.3vw, 1.05rem);">
-      A hollowed pumpkin held steady in a corridor<br>where the lights keep dying.
+      A steadiness held in trembling hands —<br>a small defiance in a corridor<br>where the walls remember.
     </p>
   </section>
 
@@ -1123,14 +1156,13 @@ body.sealed .relic{
       </h2>
       <p class="closing-text reveal reveal-delay-1">
         If the world insists love must be soft and sunlit, let it insist.<br>
-        Ours has always been made of ink and gravewater,<br>
-        of shared silence, of terrible wonders,<br>
+        Ours has always been made of ink and bone-dust,<br>
+        of shared silence, of terrible wonders —<br>
         and the devotion to look anyway.
       </p>
       <p class="closing-text reveal reveal-delay-2">
-        And if, one distant night, we are nothing but a rumor<br>
-        to those who come after — two faint figures<br>
-        in a story someone half believes —<br>
+        And if, someday, we are only a rumor to strangers — two figures<br>
+        in a story no one fully believes —<br>
         let it be written that we found beauty where others found horror…<br>
         and we never let go.
       </p>
@@ -1144,8 +1176,8 @@ body.sealed .relic{
         <div id="finalLine" class="final-line" aria-live="polite"></div>
       </div>
       <p id="signature" class="closing-signature reveal reveal-delay-5">
-        With all the tenderness the darkness permits —<br><br>
-        Yours, always.
+        With all the tenderness the dark allows —<br><br>
+        Yours. Always.
       </p>
     </div>
   </section>
@@ -1300,6 +1332,7 @@ function triggerMilestone(chapter){
     4: "It knows your name."
   };
   thought(lines[chapter] || "Keep walking.");
+  whisperSfx();
 }
 
 function setupMilestones(){
@@ -1389,15 +1422,170 @@ const scrollContainer = document.getElementById('scrollContainer');
 enterBtn.addEventListener('click', () => {
   gate.classList.add('opened');
   document.body.classList.add('entered');
+
+  // If sound is toggled on, start it here (user gesture = allowed).
+  if (soundPref) enableSound();
+
   setTimeout(() => {
     scrollContainer.classList.add('visible');
-    whisper('Click the underlined words. Collect 8 pieces of evidence. (On phones: read through the center, or touch to steer the darkness.)');
+    whisper('Move the cursor to reveal the page. Click underlined words to collect 8 relics. (On phones: read through the center, or touch to steer the darkness.)');
   }, 900);
 });
 
 
+// ─── SOUND (NO AUTOPLAY) ───
+const soundBtn = document.getElementById('soundToggle');
+let soundPref = (localStorage.getItem('sound') === 'on');
+let soundOn = false;
+
+let audioCtx, masterGain, rumbleOsc, windSource, windFilter, windGain;
+
+function updateSoundBtn(){
+  if (!soundBtn) return;
+  soundBtn.setAttribute('aria-pressed', soundPref ? 'true' : 'false');
+  soundBtn.textContent = `SOUND: ${soundPref ? 'ON' : 'OFF'}`;
+}
+
+function ensureAudio(){
+  if (audioCtx) return;
+
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+
+  audioCtx = new Ctx();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(audioCtx.destination);
+
+  // Low rumble
+  rumbleOsc = audioCtx.createOscillator();
+  const rumbleGain = audioCtx.createGain();
+  rumbleOsc.type = 'sine';
+  rumbleOsc.frequency.value = 42;
+  rumbleGain.gain.value = 0.014;
+  rumbleOsc.connect(rumbleGain).connect(masterGain);
+  rumbleOsc.start();
+
+  // A slow "heartbeat" pulse (very subtle)
+  const beatOsc = audioCtx.createOscillator();
+  const beatGain = audioCtx.createGain();
+  beatOsc.type = 'sine';
+  beatOsc.frequency.value = 62;
+  beatGain.gain.value = 0.0;
+  beatOsc.connect(beatGain).connect(masterGain);
+  beatOsc.start();
+
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.type = 'sine';
+  lfo.frequency.value = 1.1; // ~heart-ish
+  lfoGain.gain.value = 0.010;
+  lfo.connect(lfoGain).connect(beatGain.gain);
+  lfo.start();
+
+  // Wind-ish noise
+  const dur = 2; // seconds
+  const bufferSize = Math.floor(audioCtx.sampleRate * dur);
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const out = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++){
+    out[i] = (Math.random() * 2 - 1) * 0.35;
+  }
+
+  windSource = audioCtx.createBufferSource();
+  windSource.buffer = noiseBuffer;
+  windSource.loop = true;
+
+  windFilter = audioCtx.createBiquadFilter();
+  windFilter.type = 'lowpass';
+  windFilter.frequency.value = 520;
+  windFilter.Q.value = 0.7;
+
+  windGain = audioCtx.createGain();
+  windGain.gain.value = 0.007;
+
+  // Gentle movement in the wind
+  const windLfo = audioCtx.createOscillator();
+  const windLfoGain = audioCtx.createGain();
+  windLfo.type = 'sine';
+  windLfo.frequency.value = 0.08;
+  windLfoGain.gain.value = 120;
+  windLfo.connect(windLfoGain).connect(windFilter.frequency);
+  windLfo.start();
+
+  windSource.connect(windFilter).connect(windGain).connect(masterGain);
+  windSource.start();
+}
+
+function enableSound(){
+  if (!soundPref) return;
+  ensureAudio();
+  if (!audioCtx || !masterGain) return;
+  // resume is gesture-gated; we call it only from clicks
+  audioCtx.resume && audioCtx.resume();
+  soundOn = true;
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.15);
+}
+
+function disableSound(){
+  soundOn = false;
+  if (!audioCtx || !masterGain) return;
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.12);
+}
+
+// A tiny, barely-there "whisper" texture for reveals
+function whisperSfx(){
+  if (!soundOn || !audioCtx || !masterGain) return;
+  const t = audioCtx.currentTime;
+  const d = 0.30;
+
+  const size = Math.floor(audioCtx.sampleRate * d);
+  const buf = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+
+  for (let i = 0; i < size; i++){
+    const n = (Math.random() * 2 - 1);
+    const env = Math.pow(1 - i/size, 1.8);
+    data[i] = n * env * 0.55;
+  }
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+
+  const bp = audioCtx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = 1200;
+  bp.Q.value = 0.8;
+
+  const g = audioCtx.createGain();
+  g.gain.value = 0.0;
+
+  src.connect(bp).connect(g).connect(masterGain);
+
+  g.gain.setValueAtTime(0.0, t);
+  g.gain.linearRampToValueAtTime(0.05, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+
+  src.start(t);
+  src.stop(t + d + 0.02);
+}
+
+if (soundBtn){
+  soundBtn.addEventListener('click', () => {
+    soundPref = !soundPref;
+    localStorage.setItem('sound', soundPref ? 'on' : 'off');
+    updateSoundBtn();
+    if (soundPref) enableSound();
+    else disableSound();
+  });
+}
+updateSoundBtn();
+
 // ─── WHISPERS ───
 function whisper(text){
+  whisperSfx();
   const el = document.createElement('div');
   el.textContent = text;
   el.style.cssText = `
@@ -1429,7 +1617,7 @@ relics.forEach(r => {
     if (r.classList.contains('found')) return;
     r.classList.add('found');
     found.add(r.dataset.relic || 'Something you shouldn’t have touched.');
-    if (hud) hud.textContent = `EVIDENCE ${found.size}/8`;
+    if (hud) hud.textContent = `RELICS ${found.size}/8`;
     whisper(r.dataset.relic || 'Something you shouldn’t have touched.');
   });
 });
@@ -1437,12 +1625,29 @@ relics.forEach(r => {
 // ─── CRYPTID CHOICE ───
 let chosenCryptid = localStorage.getItem('cryptid') || 'Mothman';
 
+const cryptidPalette = {
+  'Mothman':        { candle: '#7b5cff', candleDim: '#4a3b74', bloodRose: '#6b2d3e' }, // bruised violet
+  'Bigfoot':        { candle: '#d4cdc4', candleDim: '#8a8578', bloodRose: '#5a3a2a' }, // bone
+  'Lake Monster':   { candle: '#8aa48f', candleDim: '#5c6f60', bloodRose: '#2f4a46' }, // sickly water
+  'The Antlered Thing': { candle: '#b55a6c', candleDim: '#6b2d3e', bloodRose: '#6b2d3e' } // blood-rose
+};
+
+
 function applyCryptid(){
   document.querySelectorAll('[data-slot="cryptid"]').forEach(s => s.textContent = chosenCryptid);
   document.querySelectorAll('.sigil').forEach(b => {
     b.classList.toggle('active', b.dataset.cryptid === chosenCryptid);
   });
+
+  // Vibe shift: subtle palette changes per omen
+  const p = cryptidPalette[chosenCryptid];
+  if (p){
+    document.documentElement.style.setProperty('--candle', p.candle);
+    document.documentElement.style.setProperty('--candle-dim', p.candleDim);
+    document.documentElement.style.setProperty('--blood-rose', p.bloodRose);
+  }
 }
+
 
 document.querySelectorAll('.sigil').forEach(b => {
   b.addEventListener('click', () => {
@@ -1453,6 +1658,51 @@ document.querySelectorAll('.sigil').forEach(b => {
   });
 });
 applyCryptid();
+
+// ─── RAVEN SECRET (CLICK TO TOGGLE) ───
+const raven = document.getElementById('raven');
+const ravenQuote = document.getElementById('ravenQuote');
+if (raven && ravenQuote){
+  let alt = false;
+  const swap = () => {
+    alt = !alt;
+    ravenQuote.innerHTML = alt ? ravenQuote.dataset.alt : ravenQuote.dataset.quote;
+    whisperSfx();
+  };
+  raven.addEventListener('click', swap);
+  raven.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      swap();
+    }
+  });
+}
+
+// ─── LONG-PRESS DIVIDERS (BONUS WHISPERS) ───
+const dividerSecrets = [
+  'Do not answer if it answers back.',
+  'Count the steps. Stop at thirteen.',
+  'The hinge remembers every hand that touched it.',
+  'If you feel watched, you probably are.'
+];
+
+document.querySelectorAll('.section-divider').forEach((d, i) => {
+  let timer = null;
+  const secret = dividerSecrets[i % dividerSecrets.length];
+
+  const start = () => {
+    timer = setTimeout(() => whisper(secret), 650);
+  };
+  const cancel = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+
+  d.addEventListener('pointerdown', start, { passive: true });
+  d.addEventListener('pointerup', cancel, { passive: true });
+  d.addEventListener('pointerleave', cancel, { passive: true });
+  d.addEventListener('pointercancel', cancel, { passive: true });
+});
 
 // ─── HERO OBJECT ───
 const hero = document.querySelector('.moon');

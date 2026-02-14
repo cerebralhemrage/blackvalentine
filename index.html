@@ -24,7 +24,12 @@
   --candle-dim: #8a7340;
   --blood-rose: #6b2d3e;
   --veil: rgba(10, 10, 15, 0.85);
+  --beam: 190px;
+  --mask-mid: 0.78;
+  --mask-outer: 0.92;
+  --mask-opacity: 1;
 }
+
 
 html {
   scroll-behavior: smooth;
@@ -719,12 +724,23 @@ body {
   pointer-events: none;
   opacity: 0;
   transition: opacity 1.2s ease;
-  background: radial-gradient(circle 140px at var(--mx, 50%) var(--my, 50%),
+  /* On desktop it follows the cursor; on phones it defaults to center and follows your finger when you touch. */
+  background: radial-gradient(circle var(--beam, 190px) at var(--mx, 50%) var(--my, 55%),
     rgba(0,0,0,0) 0%,
-    rgba(0,0,0,0.94) 55%,
-    rgba(0,0,0,0.985) 100%);
+    rgba(0,0,0,var(--mask-mid,0.78)) 52%,
+    rgba(0,0,0,var(--mask-outer,0.92)) 100%);
 }
-body.entered #darkMask{ opacity: 1; }
+body.entered #darkMask{ opacity: var(--mask-opacity, 1); }
+
+@media (pointer: coarse){
+  :root{
+    --beam: 310px;
+    --mask-mid: 0.50;
+    --mask-outer: 0.74;
+    --mask-opacity: 0.86;
+  }
+  .cursor-glow{ display:none; }
+}
 
 #hud{
   position: fixed;
@@ -1318,19 +1334,52 @@ function setupMilestones(){
 // ─── CURSOR GLOW + FLASHLIGHT ───
 const cursorGlow = document.getElementById('cursorGlow');
 const darkMask = document.getElementById('darkMask');
-let mouseX = -300, mouseY = -300;
 
-document.addEventListener('mousemove', (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  cursorGlow.style.left = mouseX + 'px';
-  cursorGlow.style.top = mouseY + 'px';
+// On phones there is no mouse — keep a readable “window” centered, and follow the finger when touched.
+let beamX = window.innerWidth / 2;
+let beamY = window.innerHeight * 0.55;
 
-  if (darkMask) {
-    darkMask.style.setProperty('--mx', mouseX + 'px');
-    darkMask.style.setProperty('--my', mouseY + 'px');
+function setBeam(x, y){
+  beamX = x; beamY = y;
+
+  if (cursorGlow){
+    cursorGlow.style.left = x + 'px';
+    cursorGlow.style.top  = y + 'px';
   }
-});
+  if (darkMask){
+    darkMask.style.setProperty('--mx', x + 'px');
+    darkMask.style.setProperty('--my', y + 'px');
+  }
+}
+
+// Initialize beam so content is visible immediately after entering.
+setBeam(beamX, beamY);
+
+// Pointer events (desktop + many modern mobile browsers)
+document.addEventListener('pointermove', (e) => {
+  setBeam(e.clientX, e.clientY);
+  if (cursorGlow){
+    // hide cursor glow on touch pointers
+    cursorGlow.style.opacity = (e.pointerType === 'mouse') ? '1' : '0';
+  }
+}, { passive: true });
+
+// Touch fallback (iOS / older browsers)
+document.addEventListener('touchstart', (e) => {
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  setBeam(t.clientX, t.clientY);
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  setBeam(t.clientX, t.clientY);
+}, { passive: true });
+
+window.addEventListener('resize', () => {
+  setBeam(window.innerWidth / 2, window.innerHeight * 0.55);
+}, { passive: true });
 
 // ─── GATE ENTRANCE ───
 const gate = document.getElementById('gate');
@@ -1342,7 +1391,7 @@ enterBtn.addEventListener('click', () => {
   document.body.classList.add('entered');
   setTimeout(() => {
     scrollContainer.classList.add('visible');
-    whisper('Click the underlined words. Collect 8 pieces of evidence.');
+    whisper('Click the underlined words. Collect 8 pieces of evidence. (On phones: read through the center, or touch to steer the darkness.)');
   }, 900);
 });
 

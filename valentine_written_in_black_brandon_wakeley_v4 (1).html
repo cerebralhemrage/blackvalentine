@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Valentine Written in Black</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Cinzel:wght@400;600;700&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --ink: #0a0a0f;
+  --moonlight: #c8c0b8;
+  --pale-bone: #d4cdc4;
+  --silver-mist: #8a8578;
+  --deep-violet: #1a1520;
+  --raven: #12111a;
+  --candle: #c9a85c;
+  --candle-dim: #8a7340;
+  --blood-rose: #6b2d3e;
+  --veil: rgba(10, 10, 15, 0.85);
+  --beam: 190px;
+  --mask-mid: 0.78;
+  --mask-outer: 0.92;
+  --mask-opacity: 1;
+}
+
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--silver-mist) var(--ink);
+}
+
+body {
+  background: var(--ink);
+  color: var(--moonlight);
+  font-family: 'Cormorant Garamond', serif;
+  overflow-x: hidden;
+  cursor: default;
+  min-height: 100vh;
+}
+
+/* ─── CUSTOM CURSOR GLOW ─── */
+.cursor-glow {
+  display: none; /* replaced by darkness/flashlight */
+  position: fixed;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(107,45,62,0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+}
+
+/* ─── STAR CANVAS ─── */
+#starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── PARTICLE CANVAS ─── */
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ─── ENTRANCE GATE ─── */
+.gate-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  transition: opacity 1.8s ease, visibility 1.8s ease;
+}
+
+.gate-overlay.opened {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.gate-ornament {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--candle-dim), transparent);
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeOrnament 2s ease 0.5s forwards;
+}
+
+@keyframes fadeOrnament {
+  to { opacity: 1; }
+}
+
+.gate-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--silver-mist);
+  margin-bottom: 50px;
+  opacity: 0;
+  animation: fadeIn 2.5s ease 0.8s forwards;
+}
+
+.gate-enter {
+  position: relative;
+  background: none;
+  border: 1px solid var(--candle-dim);
+  color: var(--candle);
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  padding: 16px 48px;
+  cursor: pointer;
+  opacity: 0;
+  animation: fadeIn 2s ease 1.5s forwards;
+  transition: all 0.5s ease;
+  overflow: hidden;
+}
+
+.gate-enter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(201,168,92,0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.gate-enter:hover {
+  border-color: var(--candle);
+  box-shadow: 0 0 30px rgba(201,168,92,0.15);
+}
+
+.gate-enter:hover::before {
+  left: 100%;
+}
+
+/* ─── MAIN SCROLL CONTAINER ─── */
+.scroll-container {
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+.scroll-container.visible {
+  opacity: 1;
+}
+
+/* ─── MOON SECTION ─── */
+.moon-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 60px 20px;
+}
+
+.moon-container {
+  position: relative;
+  width: clamp(180px, 28vw, 300px);
+  height: clamp(180px, 28vw, 300px);
+  margin-bottom: 60px;
+}
+
+.moon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* matte-black void */
+  background: radial-gradient(circle at 45% 40%,
+    #07070c 0%,
+    #040408 55%,
+    #020204 78%,
+    #000000 100%
+  );
+  box-shadow:
+    0 0 120px rgba(10,10,15,0.55),
+    inset -26px -14px 70px rgba(0,0,0,0.92),
+    inset 10px 8px 24px rgba(255,255,255,0.02);
+  animation: voidBreath 13s ease-in-out infinite;
+  position: relative;
+}
+
+.moon::before{
+  content:'';
+  position:absolute;
+  inset:-16%;
+  border-radius:50%;
+  pointer-events:none;
+  /* dim eclipse corona ring */
+  background: radial-gradient(circle,
+    rgba(0,0,0,0) 56%,
+    rgba(212,205,196,0.06) 61%,
+    rgba(212,205,196,0.02) 64%,
+    rgba(0,0,0,0) 72%);
+  filter: blur(1.3px);
+  opacity: 0.42;
+  animation: coronaFlicker 9.5s ease-in-out infinite;
+}
+
+.moon::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  pointer-events:none;
+  /* faint living distortion — not light, just wrong */
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.028) 0%, transparent 34%),
+    radial-gradient(circle at 70% 55%, rgba(255,255,255,0.02) 0%, transparent 40%),
+    radial-gradient(circle at 45% 75%, rgba(0,0,0,0.18) 0%, transparent 42%);
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+  filter: blur(0.6px);
+  animation: voidDistort 11s ease-in-out infinite;
+}
+
+@keyframes voidBreath{
+  0%, 100%{
+    transform: scale(1);
+    filter: blur(0px) contrast(1.08);
+  }
+  42%{
+    transform: scale(1.006);
+    filter: blur(0.2px) contrast(1.12);
+  }
+  /* a quick, occasional warp */
+  46%{
+    transform: scale(1.012);
+    filter: blur(0.9px) contrast(1.18);
+  }
+  50%{
+    transform: scale(1.004);
+    filter: blur(0.25px) contrast(1.12);
+  }
+  78%{
+    transform: scale(1.005);
+    filter: blur(0.18px) contrast(1.10);
+  }
+}
+
+@keyframes voidDistort{
+  0%, 100%{ transform: translate(0,0) scale(1); opacity: 0.13; }
+  28%{ transform: translate(-1.2%,0.6%) scale(1.02); opacity: 0.16; }
+  47%{ transform: translate(1.6%,-0.8%) scale(1.05); opacity: 0.22; }
+  49%{ transform: translate(-2.4%,1.1%) scale(1.07); opacity: 0.26; }
+  54%{ transform: translate(0.8%,-0.4%) scale(1.03); opacity: 0.17; }
+}
+
+@keyframes coronaFlicker{
+  0%, 100%{ opacity: 0.34; transform: scale(1); }
+  48%{ opacity: 0.55; transform: scale(1.01); }
+  52%{ opacity: 0.28; transform: scale(0.995); }
+}
+
+.moon-halo{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle,
+    rgba(0,0,0,0) 58%,
+    rgba(212,205,196,0.05) 62%,
+    rgba(212,205,196,0.015) 66%,
+    rgba(0,0,0,0) 74%);
+  filter: blur(1.6px);
+  opacity: 0.36;
+  animation: haloBreath 14s ease-in-out infinite;
+}
+
+.moon-container .moon-halo:nth-child(1){
+  width: 140%;
+  height: 140%;
+  opacity: 0.34;
+}
+
+.moon-container .moon-halo:nth-child(2){
+  width: 170%;
+  height: 170%;
+  opacity: 0.18;
+  animation-duration: 22s;
+}
+
+@keyframes haloBreath{
+  0%, 100%{ transform: translate(-50%,-50%) scale(1) rotate(0deg); opacity: 0.28; }
+  48%{ transform: translate(-50%,-50%) scale(1.02) rotate(6deg); opacity: 0.44; }
+  55%{ transform: translate(-50%,-50%) scale(0.995) rotate(-4deg); opacity: 0.22; }
+}
+
+.moon-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.4rem, 3.5vw, 2.6rem);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--pale-bone);
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 40px rgba(212,205,196,0.2);
+}
+
+.moon-subtitle {
+  font-family: 'Spectral', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+  color: var(--silver-mist);
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: fadeIn 2s ease 3s forwards;
+}
+
+.scroll-indicator span {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--silver-mist);
+  opacity: 0.5;
+}
+
+.scroll-arrow {
+  width: 1px;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--candle-dim), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 0.7; transform: scaleY(1.3); }
+}
+
+/* ─── POETRY SECTIONS ─── */
+.poetry-section {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  position: relative;
+}
+
+.poetry-content {
+  max-width: 680px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.poetry-number {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.5em;
+  color: var(--candle-dim);
+  opacity: 0.5;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+}
+
+.poetry-heading {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 400;
+  color: var(--pale-bone);
+  letter-spacing: 0.08em;
+  margin-bottom: 35px;
+  line-height: 1.6;
+}
+
+.poetry-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  font-weight: 300;
+  line-height: 2;
+  color: var(--moonlight);
+  opacity: 0.88;
+}
+
+.poetry-text em {
+  font-style: italic;
+  color: var(--pale-bone);
+}
+
+.poetry-text .candle-word {
+  color: var(--candle);
+  text-shadow: 0 0 20px rgba(201,168,92,0.3);
+}
+
+/* ─── DIVIDERS ─── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.divider-line {
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--candle-dim), transparent);
+  opacity: 0.4;
+}
+
+.divider-symbol {
+  margin: 0 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  color: var(--candle-dim);
+  opacity: 0.5;
+}
+
+/* ─── RAVEN SECTION ─── */
+.raven-section {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 20px;
+}
+
+.raven-container {
+  text-align: center;
+  max-width: 700px;
+  cursor: pointer;
+}
+.raven-container:focus-visible{
+  outline: 1px solid rgba(212,205,196,0.22);
+  outline-offset: 10px;
+}
+
+.raven-svg {
+  width: clamp(60px, 10vw, 100px);
+  height: auto;
+  margin-bottom: 40px;
+  opacity: 0.7;
+  filter: drop-shadow(0 0 15px rgba(201,168,92,0.15));
+}
+
+.raven-quote {
+  font-family: 'Spectral', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  line-height: 1.9;
+  color: var(--pale-bone);
+  letter-spacing: 0.02em;
+}
+
+/* ─── CANDLE FLICKER SECTION ─── */
+.candle-section {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 20px;
+}
+
+.candle-flame-container {
+  position: relative;
+  width: 6px;
+  height: 80px;
+  margin-bottom: 50px;
+}
+
+.candle-stick {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--candle-dim), #5a4a2a);
+  border-radius: 2px;
+}
+
+.candle-flame {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 26px;
+  background: radial-gradient(ellipse at center bottom,
+    #ffeaa7 0%,
+    var(--candle) 30%,
+    #c97b2a 60%,
+    transparent 100%
+  );
+  border-radius: 50% 50% 30% 30%;
+  animation: flicker 0.15s ease-in-out infinite alternate;
+  box-shadow: 0 0 20px rgba(201,168,92,0.6), 0 0 50px rgba(201,168,92,0.3);
+}
+
+@keyframes flicker {
+  0% { transform: translateX(-50%) scaleY(1) scaleX(1) rotate(-1deg); }
+  25% { transform: translateX(-50%) scaleY(1.05) scaleX(0.95) rotate(1deg); }
+  50% { transform: translateX(-50%) scaleY(0.97) scaleX(1.02) rotate(-0.5deg); }
+  75% { transform: translateX(-50%) scaleY(1.03) scaleX(0.98) rotate(0.5deg); }
+  100% { transform: translateX(-50%) scaleY(1) scaleX(1) rotate(0deg); }
+}
+
+.candle-glow {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,168,92,0.08) 0%, transparent 70%);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+}
+
+/* ─── CLOSING SECTION ─── */
+.closing-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  position: relative;
+}
+
+.closing-content {
+  max-width: 620px;
+  text-align: center;
+}
+
+.closing-vow {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.3rem, 3vw, 2.2rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--pale-bone);
+  line-height: 1.7;
+  margin-bottom: 50px;
+  text-shadow: 0 0 30px rgba(212,205,196,0.15);
+}
+
+.closing-text {
+  font-family: 'Spectral', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+  line-height: 2;
+  color: var(--silver-mist);
+  margin-bottom: 60px;
+}
+
+.closing-signature {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--candle);
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 25px rgba(201,168,92,0.25);
+}
+
+/* ─── REVEAL ANIMATIONS ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.2s ease, transform 1.2s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.2s; }
+.reveal-delay-2 { transition-delay: 0.4s; }
+.reveal-delay-3 { transition-delay: 0.6s; }
+.reveal-delay-4 { transition-delay: 0.8s; }
+
+/* ─── FOG LAYERS ─── */
+.fog-layer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 30vh;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.fog-1 {
+  background: linear-gradient(to top,
+    rgba(26,21,32,0.6) 0%,
+    rgba(26,21,32,0.3) 30%,
+    transparent 100%
+  );
+  animation: fogDrift 25s linear infinite;
+}
+
+.fog-2 {
+  background: linear-gradient(to top,
+    rgba(18,17,26,0.4) 0%,
+    rgba(18,17,26,0.15) 40%,
+    transparent 100%
+  );
+  animation: fogDrift 35s linear infinite reverse;
+  opacity: 0.2;
+}
+
+@keyframes fogDrift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ─── UTILITY ─── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .poetry-section {
+    padding: 60px 24px;
+    min-height: auto;
+  }
+  .poetry-text {
+    line-height: 1.85;
+  }
+  .moon-section {
+    padding: 40px 20px;
+  }
+}
+
+/* ─── VIGNETTE OVERLAY ─── */
+.vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(10,10,15,0.7) 100%);
+}
+
+/* ─── GRAIN TEXTURE ─── */
+.grain {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  animation: grainShift 0.5s steps(4) infinite;
+}
+
+@keyframes grainShift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, -1%); }
+  50% { transform: translate(1%, 2%); }
+  75% { transform: translate(-1%, -2%); }
+  100% { transform: translate(0, 0); }
+}
+
+
+/* ─── Interactive darkness ─── */
+#darkMask{
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  /* On desktop it follows the cursor; on phones it defaults to center and follows your finger when you touch. */
+  background: radial-gradient(circle var(--beam, 190px) at var(--mx, 50%) var(--my, 55%),
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,var(--mask-mid,0.78)) 52%,
+    rgba(0,0,0,var(--mask-outer,0.92)) 100%);
+}
+body.entered #darkMask{ opacity: var(--mask-opacity, 1); }
+
+@media (pointer: coarse){
+  :root{
+    --beam: 310px;
+    --mask-mid: 0.50;
+    --mask-outer: 0.74;
+    --mask-opacity: 0.86;
+  }
+  .cursor-glow{ display:none; }
+}
+
+#hud{
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 10000;
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  color: rgba(212,205,196,0.55);
+  user-select: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+body.entered #hud{ opacity: 1; }
+
+#soundToggle{
+  background: rgba(10,10,15,0.35);
+  border: 1px solid rgba(212,205,196,0.16);
+  color: rgba(212,205,196,0.62);
+  padding: 7px 10px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 200ms ease, color 200ms ease, transform 200ms ease, background 200ms ease;
+}
+#soundToggle:hover{
+  transform: translateY(-1px);
+  border-color: rgba(212,205,196,0.32);
+  color: rgba(212,205,196,0.85);
+  background: rgba(10,10,15,0.45);
+}
+#soundToggle[aria-pressed="true"]{
+  border-color: rgba(212,205,196,0.42);
+  color: rgba(212,205,196,0.90);
+}
+
+
+.relic{
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(212,205,196,0.25);
+}
+.relic.found{
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+.moon{ cursor: pointer; }
+.moon.wound{
+  box-shadow:
+    0 0 140px rgba(10,10,15,0.65),
+    inset -28px -16px 80px rgba(0,0,0,0.94),
+    inset 0 0 52px rgba(120,10,20,0.10),
+    0 0 120px rgba(120,10,20,0.05);
+}
+
+.gate-subtitle{
+  display:block;
+  margin-top: 12px;
+  font-family: 'Spectral', serif;
+  font-style: italic;
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.gate-choice{
+  display:flex;
+  flex-wrap: wrap;
+  gap:10px;
+  margin-top: 22px;
+  opacity: 0;
+  animation: fadeIn 2s ease 1.2s forwards;
+  justify-content: center;
+}
+.sigil{
+  background:none;
+  border:1px solid rgba(212,205,196,0.18);
+  color: rgba(212,205,196,0.72);
+  padding:10px 14px;
+  font-family:'Cinzel', serif;
+  letter-spacing:0.18em;
+  font-size:0.55rem;
+  cursor:pointer;
+  transition: transform 0.2s ease, border-color 0.35s ease, color 0.35s ease;
+}
+.sigil:hover{ transform: translateY(-1px); }
+.sigil.active{
+  border-color: rgba(212,205,196,0.58);
+  color: rgba(212,205,196,0.92);
+}
+
+
+/* ─── EXTRA REVEAL DELAYS ─── */
+.reveal-delay-5 { transition-delay: 1.0s; }
+.reveal-delay-6 { transition-delay: 1.2s; }
+
+/* ─── SCROLL MILESTONE EVENTS ─── */
+@keyframes tremor {
+  0%   { transform: translate(0,0); }
+  20%  { transform: translate(0.6px,-0.4px); }
+  40%  { transform: translate(-0.7px,0.5px); }
+  60%  { transform: translate(0.5px,0.3px); }
+  80%  { transform: translate(-0.4px,-0.2px); }
+  100% { transform: translate(0,0); }
+}
+body.tremor #scrollContainer{
+  animation: tremor 360ms ease both;
+}
+
+.grain.glitch{
+  opacity: 0.085;
+  filter: contrast(1.55) brightness(1.08);
+  animation-duration: 0.08s;
+}
+
+.thought-line{
+  position: fixed;
+  left: 50%;
+  top: 72%;
+  transform: translateX(-50%);
+  z-index: 10002;
+  pointer-events: none;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  color: rgba(212,205,196,0.75);
+  opacity: 0;
+  text-shadow: 0 0 22px rgba(107,45,62,0.12);
+  animation: thoughtFade 3.8s ease forwards;
+}
+
+@keyframes thoughtFade{
+  0%{ opacity: 0; filter: blur(2px); transform: translateX(-50%) translateY(10px); }
+  18%{ opacity: 0.85; filter: blur(0.2px); transform: translateX(-50%) translateY(0); }
+  70%{ opacity: 0.55; filter: blur(0px); }
+  100%{ opacity: 0; filter: blur(2px); transform: translateX(-50%) translateY(-8px); }
+}
+
+/* ─── FINAL SEAL ─── */
+#sealOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 10005;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2.6s ease;
+  background: radial-gradient(ellipse at center,
+    rgba(0,0,0,0.0) 0%,
+    rgba(0,0,0,0.78) 58%,
+    rgba(0,0,0,0.92) 100%);
+}
+
+body.sealed #sealOverlay{ opacity: 1; }
+
+.seal-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: 14px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.seal-btn{
+  background: rgba(10,10,15,0.35);
+  border: 1px solid rgba(212,205,196,0.18);
+  color: rgba(212,205,196,0.78);
+  padding: 14px 18px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.26em;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 200ms ease, border-color 200ms ease, color 200ms ease, background 200ms ease;
+}
+
+.seal-btn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(212,205,196,0.35);
+  color: rgba(212,205,196,0.92);
+  background: rgba(10,10,15,0.45);
+}
+
+.seal-btn:disabled{
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
+
+.final-line{
+  max-width: 760px;
+  text-align: center;
+  font-family: 'Spectral', serif;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  line-height: 1.9;
+  color: rgba(212,205,196,0.80);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1.8s ease, transform 1.8s ease;
+}
+
+body.sealed .final-line{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#signature.burning{
+  text-shadow:
+    0 0 28px rgba(107,45,62,0.12),
+    0 0 64px rgba(10,10,15,0.28);
+}
+
+@keyframes inkFlicker{
+  0%, 100%{ filter: blur(0px); }
+  48%{ filter: blur(0.15px); }
+  52%{ filter: blur(0px); }
+}
+
+body.sealed #signature.burning{
+  animation: inkFlicker 4.6s ease-in-out infinite;
+}
+
+body.sealed #hud{
+  opacity: 0.18;
+}
+
+body.sealed .relic{
+  pointer-events: none;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Atmospheric layers -->
+<canvas id="starfield"></canvas>
+<canvas id="particles"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+<div class="fog-layer fog-1"></div>
+<div class="fog-layer fog-2"></div>
+<div id="darkMask" aria-hidden="true"></div>
+<div id="sealOverlay" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true">
+  <span id="evidenceCount">RELICS 0/8</span>
+  <button id="soundToggle" type="button" aria-pressed="false" aria-label="Toggle sound">SOUND: OFF</button>
+</div>
+
+<!-- Entrance Gate -->
+<div class="gate-overlay" id="gate">
+  <div class="gate-ornament"></div>
+  <div class="gate-title">A Valentine Written in Black<span class="gate-subtitle">for Brandon Wakeley</span></div>
+    <div class="gate-choice" role="group" aria-label="Choose your omen">
+    <button class="sigil" data-cryptid="Mothman">Mothman</button>
+    <button class="sigil" data-cryptid="Bigfoot">Bigfoot</button>
+    <button class="sigil" data-cryptid="Lake Monster">Lake Monster</button>
+    <button class="sigil" data-cryptid="The Antlered Thing">Antlered Thing</button>
+  </div>
+  <button class="gate-enter" id="enterBtn" aria-label="Enter">Cross the Threshold</button>
+</div>
+
+<!-- Main Content -->
+<div class="scroll-container" id="scrollContainer">
+
+  <!-- I. Moon -->
+  <section class="moon-section">
+    <div class="moon-container reveal">
+      <div class="moon-halo"></div>
+      <div class="moon-halo"></div>
+      <div class="moon"></div>
+    </div>
+    <h1 class="moon-title reveal reveal-delay-1">To My Favorite Darkness</h1>
+    <p class="moon-subtitle reveal reveal-delay-2">A vow spoken softly, for the one who never flinches when the world goes wrong.</p>
+    <div class="scroll-indicator">
+      <span>Descend</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span class="divider-symbol">I</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- II. The Binding -->
+  <section class="poetry-section">
+    <div class="poetry-content">
+      <div class="poetry-number reveal">Chapter One</div>
+      <h2 class="poetry-heading reveal reveal-delay-1">The Black Ribbon</h2>
+      <p class="poetry-text reveal reveal-delay-2">
+                When the world dresses itself in sweetness and calls it love, I think of you — <em class="candle-word">Brandon Wakeley</em> — the truer thing. The one who never asked me to be bright, or easy, or harmless.<br><br>
+How long since we first tied that <span class="relic" data-relic="A knot of black twine—warm from a pocket, damp with river-fog.">black ribbon</span> between us, not as a promise of goodness, but as an agreement to be honest? We were bound — not by convenience, not by a neat little oath — but by a gravity older than manners. The kind that pulls two souls toward the same locked <span class="relic" data-relic="The latch is cold. The wood is scratched from the inside.">door</span>… and makes them smile.
+      </p>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span class="divider-symbol">II</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- III. The Wandering -->
+  <section class="poetry-section">
+    <div class="poetry-content">
+      <div class="poetry-number reveal">Chapter Two</div>
+      <h2 class="poetry-heading reveal reveal-delay-1">Two Shapes on the Same Bad Street</h2>
+      <p class="poetry-text reveal reveal-delay-2">
+                Other people ran toward comfort like it could save them. We walked the opposite direction and found the air <em class="candle-word">beautiful</em> when it turned heavy.<br><br>
+We learned the language of wrongness: the hush where a room should breathe, the soft pressure of being watched, the way a hallway can feel too long by exactly one step. We did not call it superstition. We called it <em class="candle-word">evidence</em> — and sometimes we called it <span data-slot="cryptid"></span> when the woods answered back.<br><br>
+When the world tries to convince us it’s empty, we listen harder. When it tells us not to look, we look anyway — slow, laughing, collecting <span class="relic" data-relic="A blurry photo. The background is fine. The foreground is not.">proof</span> like prayers we never say out loud.
+      </p>
+    </div>
+  </section>
+
+  <!-- Raven Interlude -->
+  <section class="raven-section">
+    <div class="raven-container reveal" id="raven" role="button" tabindex="0" aria-label="Raven interlude (click to reveal another line)">
+      <svg class="raven-svg" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10 C30 10, 10 25, 8 45 C6 55, 12 65, 25 68 L20 75 L30 70 L35 76 L38 69 C42 70, 46 70, 50 70 C54 70, 58 70, 62 69 L65 76 L70 70 L80 75 L75 68 C88 65, 94 55, 92 45 C90 25, 70 10, 50 10Z" fill="var(--silver-mist)" opacity="0.15"/>
+        <circle cx="38" cy="35" r="2.5" fill="var(--candle)" opacity="0.7"/>
+        <circle cx="62" cy="35" r="2.5" fill="var(--candle)" opacity="0.7"/>
+        <path d="M46 42 L50 48 L54 42" stroke="var(--silver-mist)" stroke-width="1.5" fill="none" opacity="0.3"/>
+      </svg>
+      <p class="raven-quote" id="ravenQuote"
+        data-quote="Faithful as a door that won’t stay shut,<br>steady as footsteps in an empty house —<br>you were always the first one I wanted beside me."
+        data-alt="Sometimes the house answers back.<br>Sometimes it learns your voice.<br>And still — I’d rather hear it with you.">
+        Faithful as a door that won’t stay shut,<br>
+        steady as footsteps in an empty house —<br>
+        you were always the first one I wanted beside me.
+      </p>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span class="divider-symbol">III</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- IV. The Understanding -->
+  <section class="poetry-section">
+    <div class="poetry-content">
+      <div class="poetry-number reveal">Chapter Three</div>
+      <h2 class="poetry-heading reveal reveal-delay-1">The Dark Is Not Empty</h2>
+      <p class="poetry-text reveal reveal-delay-2">
+                There is a rare comfort in someone who doesn’t demand the world be simple. With you, I never had to pretend the dark is nothing.<br><br>
+We both know it’s <em class="candle-word">full</em>: full of old griefs that press their faces to the glass, full of names you don’t say aloud, full of beauty so strange it feels like a threat. The unknown has leaned close to us before — and instead of begging it to stop, we stood still and let ourselves feel the awe.<br><br>
+Sometimes it leaves proof: a <span class="relic" data-relic="A feather like burned velvet, too big for any bird here.">feather</span> where no bird should be, a <span class="relic" data-relic="A tooth with a root that looks almost human. Almost.">tooth</span> tucked beneath the porch step. We do not turn away. We take inventory.
+      </p>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span class="divider-symbol">IV</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- V. The Promise -->
+  <section class="poetry-section">
+    <div class="poetry-content">
+      <div class="poetry-number reveal">Chapter Four</div>
+      <h2 class="poetry-heading reveal reveal-delay-1">The Name I Would Say First</h2>
+      <p class="poetry-text reveal reveal-delay-2">
+                If the air ever thickens again — if a certain hour arrives and the <span class="relic" data-relic="A seam between rooms, parted just enough to stare back.">veil</span> between things goes thin — I know whose name I would say first: <em class="candle-word">Brandon Wakeley</em>.<br><br>
+Not because I expect rescue. But because I would rather face the <em class="candle-word">unspeakable</em> with you than spend one safe day feeling alone. If something is going to reach for me, let it find me holding steady — shoulder to shoulder with the person who has always understood what it means to stay.<br><br>
+If the air tastes like <span class="relic" data-relic="Metal on the tongue—like a coin you shouldn’t have swallowed.">iron</span>, if the door changes its mind behind us, if the dark starts to <span class="relic" data-relic="You can hear it: the quiet rhythm of something that isn’t your own.">breathe</span> — we do not run. We keep our place.
+      </p>
+    </div>
+  </section>
+
+  <!-- Candle -->
+  <section class="candle-section">
+    <div class="candle-flame-container reveal">
+      <div class="candle-glow"></div>
+      <div class="candle-flame"></div>
+      <div class="candle-stick"></div>
+    </div>
+    <p class="poetry-text reveal reveal-delay-1" style="max-width: 560px; text-align: center; font-style: italic; opacity: 0.7; font-size: clamp(0.9rem, 1.3vw, 1.05rem);">
+      A steadiness held in trembling hands —<br>a small defiance in a corridor<br>where the walls remember.
+    </p>
+  </section>
+
+  <!-- Divider -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span class="divider-symbol">∞</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- VI. Closing -->
+  <section class="closing-section">
+    <div class="closing-content">
+      <h2 class="closing-vow reveal">
+        A Spell Spoken Once<br>& Never Broken
+      </h2>
+      <p class="closing-text reveal reveal-delay-1">
+        If the world insists love must be soft and sunlit, let it insist.<br>
+        Ours has always been made of ink and bone-dust,<br>
+        of shared silence, of terrible wonders —<br>
+        and the devotion to look anyway.
+      </p>
+      <p class="closing-text reveal reveal-delay-2">
+        And if, someday, we are only a rumor to strangers — two figures<br>
+        in a story no one fully believes —<br>
+        let it be written that we found beauty where others found horror…<br>
+        and we never let go.
+      </p>
+      <div class="section-divider reveal reveal-delay-3">
+        <div class="divider-line"></div>
+        <span class="divider-symbol">⟡</span>
+        <div class="divider-line"></div>
+      </div>
+      <div class="seal-wrap reveal reveal-delay-4">
+        <button id="sealBtn" class="seal-btn" type="button">Seal the Vow</button>
+        <div id="finalLine" class="final-line" aria-live="polite"></div>
+      </div>
+      <p id="signature" class="closing-signature reveal reveal-delay-5">
+        With all the tenderness the dark allows —<br><br>
+        Yours. Always.
+      </p>
+    </div>
+  </section>
+
+  <div style="height: 80px;"></div>
+
+</div>
+
+<script>
+// ─── STARFIELD ───
+const starCanvas = document.getElementById('starfield');
+const starCtx = starCanvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+  starCanvas.width = window.innerWidth;
+  starCanvas.height = window.innerHeight;
+  stars = [];
+  const count = Math.floor((starCanvas.width * starCanvas.height) / 4000);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * starCanvas.width,
+      y: Math.random() * starCanvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      alpha: Math.random() * 0.6 + 0.1,
+      twinkleSpeed: Math.random() * 0.008 + 0.002,
+      twinkleOffset: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function drawStars(time) {
+  starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+  stars.forEach(s => {
+    const alpha = s.alpha + Math.sin(time * s.twinkleSpeed + s.twinkleOffset) * 0.15;
+    starCtx.beginPath();
+    starCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    starCtx.fillStyle = `rgba(212,205,196,${Math.max(0.05, alpha)})`;
+    starCtx.fill();
+  });
+}
+
+// ─── DRIFTING PARTICLES ───
+const partCanvas = document.getElementById('particles');
+const partCtx = partCanvas.getContext('2d');
+let particles = [];
+let particleReverseUntil = 0;
+
+function initParticles() {
+  partCanvas.width = window.innerWidth;
+  partCanvas.height = document.documentElement.scrollHeight;
+  particles = [];
+  const count = Math.floor(partCanvas.width / 25);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * partCanvas.width,
+      y: Math.random() * partCanvas.height,
+      r: Math.random() * 1.5 + 0.5,
+      speedX: (Math.random() - 0.5) * 0.15,
+      speedY: -Math.random() * 0.3 - 0.05,
+      alpha: Math.random() * 0.25 + 0.05,
+      wobbleAmp: Math.random() * 20 + 5,
+      wobbleSpeed: Math.random() * 0.003 + 0.001,
+      wobbleOffset: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function reverseParticles(ms = 2000){
+  particleReverseUntil = performance.now() + ms;
+}
+
+function drawParticles(time) {
+  partCtx.clearRect(0, 0, partCanvas.width, partCanvas.height);
+  const scrollY = window.scrollY;
+  const now = performance.now();
+  const dir = (now < particleReverseUntil) ? -1 : 1;
+  particles.forEach(p => {
+    p.y += p.speedY * dir;
+    p.x += p.speedX * dir;
+    const wobble = Math.sin(time * p.wobbleSpeed + p.wobbleOffset) * p.wobbleAmp;
+    if (p.y < -10) {
+      p.y = partCanvas.height + 10;
+      p.x = Math.random() * partCanvas.width;
+    }
+    if (p.x < -20) p.x = partCanvas.width + 20;
+    if (p.x > partCanvas.width + 20) p.x = -20;
+    const drawX = p.x + wobble;
+    const drawY = p.y - scrollY * 0.05;
+    partCtx.beginPath();
+    partCtx.arc(drawX, drawY + scrollY, p.r, 0, Math.PI * 2);
+    partCtx.fillStyle = `rgba(201,168,92,${p.alpha})`;
+    partCtx.fill();
+  });
+}
+
+// ─── ANIMATION LOOP ───
+function animate(time) {
+  drawStars(time);
+  drawParticles(time);
+  requestAnimationFrame(animate);
+}
+
+// ─── SCROLL REVEAL ───
+function setupReveal() {
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+}
+
+// ─── SCROLL MILESTONE EVENTS ───
+const grainEl = document.querySelector('.grain');
+const milestoneSeen = new Set();
+
+function tremorOnce(){
+  document.body.classList.add('tremor');
+  setTimeout(() => document.body.classList.remove('tremor'), 380);
+}
+
+function grainGlitch(){
+  if (!grainEl) return;
+  grainEl.classList.add('glitch');
+  setTimeout(() => grainEl.classList.remove('glitch'), 320);
+}
+
+function thought(text){
+  const el = document.createElement('div');
+  el.className = 'thought-line';
+  el.textContent = text;
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
+function triggerMilestone(chapter){
+  if (milestoneSeen.has(chapter)) return;
+  milestoneSeen.add(chapter);
+
+  tremorOnce();
+  grainGlitch();
+  reverseParticles(2000);
+
+  const lines = {
+    2: "Don't look behind you.",
+    3: "Something is breathing where it shouldn't.",
+    4: "It knows your name."
+  };
+  thought(lines[chapter] || "Keep walking.");
+  whisperSfx();
+}
+
+function setupMilestones(){
+  const sections = Array.from(document.querySelectorAll('.poetry-section'));
+  const targets = [];
+
+  sections.forEach(sec => {
+    const num = sec.querySelector('.poetry-number');
+    if (!num) return;
+    const t = (num.textContent || '').trim();
+    if (t === 'Chapter Two') targets.push({ sec, chapter: 2 });
+    if (t === 'Chapter Three') targets.push({ sec, chapter: 3 });
+    if (t === 'Chapter Four') targets.push({ sec, chapter: 4 });
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const chapter = Number(entry.target.dataset.chapter);
+        triggerMilestone(chapter);
+      }
+    });
+  }, { threshold: 0.45, rootMargin: '0px 0px -20% 0px' });
+
+  targets.forEach(t => {
+    t.sec.dataset.chapter = String(t.chapter);
+    observer.observe(t.sec);
+  });
+}
+
+
+// ─── CURSOR GLOW + FLASHLIGHT ───
+const cursorGlow = document.getElementById('cursorGlow');
+const darkMask = document.getElementById('darkMask');
+
+// On phones there is no mouse — keep a readable “window” centered, and follow the finger when touched.
+let beamX = window.innerWidth / 2;
+let beamY = window.innerHeight * 0.55;
+
+function setBeam(x, y){
+  beamX = x; beamY = y;
+
+  if (cursorGlow){
+    cursorGlow.style.left = x + 'px';
+    cursorGlow.style.top  = y + 'px';
+  }
+  if (darkMask){
+    darkMask.style.setProperty('--mx', x + 'px');
+    darkMask.style.setProperty('--my', y + 'px');
+  }
+}
+
+// Initialize beam so content is visible immediately after entering.
+setBeam(beamX, beamY);
+
+// Pointer events (desktop + many modern mobile browsers)
+document.addEventListener('pointermove', (e) => {
+  setBeam(e.clientX, e.clientY);
+  if (cursorGlow){
+    // hide cursor glow on touch pointers
+    cursorGlow.style.opacity = (e.pointerType === 'mouse') ? '1' : '0';
+  }
+}, { passive: true });
+
+// Touch fallback (iOS / older browsers)
+document.addEventListener('touchstart', (e) => {
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  setBeam(t.clientX, t.clientY);
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  setBeam(t.clientX, t.clientY);
+}, { passive: true });
+
+window.addEventListener('resize', () => {
+  setBeam(window.innerWidth / 2, window.innerHeight * 0.55);
+}, { passive: true });
+
+// ─── GATE ENTRANCE ───
+const gate = document.getElementById('gate');
+const enterBtn = document.getElementById('enterBtn');
+const scrollContainer = document.getElementById('scrollContainer');
+
+enterBtn.addEventListener('click', () => {
+  gate.classList.add('opened');
+  document.body.classList.add('entered');
+
+  // If sound is toggled on, start it here (user gesture = allowed).
+  if (soundPref) enableSound();
+
+  setTimeout(() => {
+    scrollContainer.classList.add('visible');
+    whisper('Move the cursor to reveal the page. Click underlined words to collect 8 relics. (On phones: read through the center, or touch to steer the darkness.)');
+  }, 900);
+});
+
+
+// ─── SOUND (NO AUTOPLAY) ───
+const soundBtn = document.getElementById('soundToggle');
+let soundPref = (localStorage.getItem('sound') === 'on');
+let soundOn = false;
+
+let audioCtx, masterGain, rumbleOsc, windSource, windFilter, windGain;
+
+function updateSoundBtn(){
+  if (!soundBtn) return;
+  soundBtn.setAttribute('aria-pressed', soundPref ? 'true' : 'false');
+  soundBtn.textContent = `SOUND: ${soundPref ? 'ON' : 'OFF'}`;
+}
+
+function ensureAudio(){
+  if (audioCtx) return;
+
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+
+  audioCtx = new Ctx();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(audioCtx.destination);
+
+  // Low rumble
+  rumbleOsc = audioCtx.createOscillator();
+  const rumbleGain = audioCtx.createGain();
+  rumbleOsc.type = 'sine';
+  rumbleOsc.frequency.value = 42;
+  rumbleGain.gain.value = 0.06;
+  rumbleOsc.connect(rumbleGain).connect(masterGain);
+  rumbleOsc.start();
+
+  // A slow "heartbeat" pulse (very subtle)
+  const beatOsc = audioCtx.createOscillator();
+  const beatGain = audioCtx.createGain();
+  beatOsc.type = 'sine';
+  beatOsc.frequency.value = 62;
+  beatGain.gain.value = 0.0;
+  beatOsc.connect(beatGain).connect(masterGain);
+  beatOsc.start();
+
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.type = 'sine';
+  lfo.frequency.value = 1.1; // ~heart-ish
+  lfoGain.gain.value = 0.010;
+  lfo.connect(lfoGain).connect(beatGain.gain);
+  lfo.start();
+
+  // Wind-ish noise
+  const dur = 2; // seconds
+  const bufferSize = Math.floor(audioCtx.sampleRate * dur);
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const out = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++){
+    out[i] = (Math.random() * 2 - 1) * 0.35;
+  }
+
+  windSource = audioCtx.createBufferSource();
+  windSource.buffer = noiseBuffer;
+  windSource.loop = true;
+
+  windFilter = audioCtx.createBiquadFilter();
+  windFilter.type = 'lowpass';
+  windFilter.frequency.value = 520;
+  windFilter.Q.value = 0.7;
+
+  windGain = audioCtx.createGain();
+  windGain.gain.value = 0.03;
+
+  // Gentle movement in the wind
+  const windLfo = audioCtx.createOscillator();
+  const windLfoGain = audioCtx.createGain();
+  windLfo.type = 'sine';
+  windLfo.frequency.value = 0.08;
+  windLfoGain.gain.value = 120;
+  windLfo.connect(windLfoGain).connect(windFilter.frequency);
+  windLfo.start();
+
+  windSource.connect(windFilter).connect(windGain).connect(masterGain);
+  windSource.start();
+}
+
+function enableSound(){
+  if (!soundPref) return;
+  ensureAudio();
+  if (!audioCtx || !masterGain) return;
+
+  // Safari/iOS can be finicky; keep trying to resume on user gestures.
+  try{
+    if (audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume();
+    else if (audioCtx.resume) audioCtx.resume();
+  }catch(_e){}
+
+  soundOn = true;
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setTargetAtTime(0.28, audioCtx.currentTime, 0.15);
+
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setTargetAtTime(0.28, audioCtx.currentTime, 0.15);
+}
+
+function disableSound(){
+  soundOn = false;
+  if (!audioCtx || !masterGain) return;
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.12);
+}
+
+// A tiny, barely-there "whisper" texture for reveals
+function whisperSfx(){
+  if (!soundOn || !audioCtx || !masterGain) return;
+  const t = audioCtx.currentTime;
+  const d = 0.30;
+
+  const size = Math.floor(audioCtx.sampleRate * d);
+  const buf = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+
+  for (let i = 0; i < size; i++){
+    const n = (Math.random() * 2 - 1);
+    const env = Math.pow(1 - i/size, 1.8);
+    data[i] = n * env * 0.55;
+  }
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+
+  const bp = audioCtx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = 1200;
+  bp.Q.value = 0.8;
+
+  const g = audioCtx.createGain();
+  g.gain.value = 0.0;
+
+  src.connect(bp).connect(g).connect(masterGain);
+
+  g.gain.setValueAtTime(0.0, t);
+  g.gain.linearRampToValueAtTime(0.12, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+
+  src.start(t);
+  src.stop(t + d + 0.02);
+}
+
+if (soundBtn){
+  soundBtn.addEventListener('click', () => {
+    soundPref = !soundPref;
+    localStorage.setItem('sound', soundPref ? 'on' : 'off');
+    updateSoundBtn();
+
+// Extra safety: any tap/click will attempt to (re)unlock audio if the user has Sound ON.
+document.addEventListener('pointerdown', () => {
+  if (soundPref && !soundOn) enableSound();
+}, { passive: true });
+
+    if (soundPref) enableSound();
+    else disableSound();
+  });
+}
+updateSoundBtn();
+
+// ─── WHISPERS ───
+function whisper(text){
+  whisperSfx();
+  const el = document.createElement('div');
+  el.textContent = text;
+  el.style.cssText = `
+    position:fixed; left:50%; top:18%;
+    transform:translateX(-50%);
+    z-index:10001;
+    max-width:min(680px, 92vw);
+    padding:14px 16px;
+    font-family:'Spectral', serif;
+    font-style:italic;
+    letter-spacing:0.02em;
+    color: rgba(212,205,196,0.84);
+    background: rgba(10,10,15,0.72);
+    border: 1px solid rgba(212,205,196,0.12);
+    backdrop-filter: blur(6px);
+  `;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity 900ms"; }, 1200);
+  setTimeout(()=> el.remove(), 2200);
+}
+
+// ─── EVIDENCE RELICS ───
+const hud = document.getElementById('evidenceCount');
+const relics = document.querySelectorAll('.relic');
+const found = new Set();
+
+relics.forEach(r => {
+  r.addEventListener('click', () => {
+    if (r.classList.contains('found')) return;
+    r.classList.add('found');
+    found.add(r.dataset.relic || 'Something you shouldn’t have touched.');
+    if (hud) hud.textContent = `RELICS ${found.size}/8`;
+    whisper(r.dataset.relic || 'Something you shouldn’t have touched.');
+  });
+});
+
+// ─── CRYPTID CHOICE ───
+let chosenCryptid = localStorage.getItem('cryptid') || 'Mothman';
+
+const cryptidPalette = {
+  'Mothman':        { candle: '#7b5cff', candleDim: '#4a3b74', bloodRose: '#6b2d3e' }, // bruised violet
+  'Bigfoot':        { candle: '#d4cdc4', candleDim: '#8a8578', bloodRose: '#5a3a2a' }, // bone
+  'Lake Monster':   { candle: '#8aa48f', candleDim: '#5c6f60', bloodRose: '#2f4a46' }, // sickly water
+  'The Antlered Thing': { candle: '#b55a6c', candleDim: '#6b2d3e', bloodRose: '#6b2d3e' } // blood-rose
+};
+
+
+function applyCryptid(){
+  document.querySelectorAll('[data-slot="cryptid"]').forEach(s => s.textContent = chosenCryptid);
+  document.querySelectorAll('.sigil').forEach(b => {
+    b.classList.toggle('active', b.dataset.cryptid === chosenCryptid);
+  });
+
+  // Vibe shift: subtle palette changes per omen
+  const p = cryptidPalette[chosenCryptid];
+  if (p){
+    document.documentElement.style.setProperty('--candle', p.candle);
+    document.documentElement.style.setProperty('--candle-dim', p.candleDim);
+    document.documentElement.style.setProperty('--blood-rose', p.bloodRose);
+  }
+}
+
+
+document.querySelectorAll('.sigil').forEach(b => {
+  b.addEventListener('click', () => {
+    chosenCryptid = b.dataset.cryptid;
+    localStorage.setItem('cryptid', chosenCryptid);
+    applyCryptid();
+    whisper(`Omen chosen: ${chosenCryptid}.`);
+  });
+});
+applyCryptid();
+
+// ─── RAVEN SECRET (CLICK TO TOGGLE) ───
+const raven = document.getElementById('raven');
+const ravenQuote = document.getElementById('ravenQuote');
+if (raven && ravenQuote){
+  let alt = false;
+  const swap = () => {
+    alt = !alt;
+    ravenQuote.innerHTML = alt ? ravenQuote.dataset.alt : ravenQuote.dataset.quote;
+    whisperSfx();
+  };
+  raven.addEventListener('click', swap);
+  raven.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      swap();
+    }
+  });
+}
+
+// ─── LONG-PRESS DIVIDERS (BONUS WHISPERS) ───
+const dividerSecrets = [
+  'Do not answer if it answers back.',
+  'Count the steps. Stop at thirteen.',
+  'The hinge remembers every hand that touched it.',
+  'If you feel watched, you probably are.'
+];
+
+document.querySelectorAll('.section-divider').forEach((d, i) => {
+  let timer = null;
+  const secret = dividerSecrets[i % dividerSecrets.length];
+
+  const start = () => {
+    timer = setTimeout(() => whisper(secret), 650);
+  };
+  const cancel = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+
+  d.addEventListener('pointerdown', start, { passive: true });
+  d.addEventListener('pointerup', cancel, { passive: true });
+  d.addEventListener('pointerleave', cancel, { passive: true });
+  d.addEventListener('pointercancel', cancel, { passive: true });
+});
+
+// ─── HERO OBJECT ───
+const hero = document.querySelector('.moon');
+if (hero){
+  hero.addEventListener('click', () => {
+    hero.classList.toggle('wound');
+        whisper(hero.classList.contains('wound')
+      ? 'The void flexes—like skin over a hidden mouth.'
+      : 'It stills. The ring goes quiet.'
+    );
+  });
+}
+
+// ─── FINAL SEAL ───
+const sealBtn = document.getElementById('sealBtn');
+const signatureEl = document.getElementById('signature');
+const finalLineEl = document.getElementById('finalLine');
+
+function cleanHtmlToText(htmlStr){
+  return (htmlStr || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
+}
+
+function typewriter(el, text, speed = 28){
+  el.textContent = '';
+  el.style.whiteSpace = 'pre-line';
+  let i = 0;
+  const tick = () => {
+    el.textContent += text[i];
+    i += 1;
+    if (i < text.length) setTimeout(tick, speed);
+  };
+  tick();
+}
+
+function lineForCryptid(c){
+  const lines = {
+    'Mothman': 'Somewhere above the treeline, wings fold—patient, listening to what you sealed.',
+    'Bigfoot': 'In the mud behind you: a print too long to be human, fresh as if it just arrived.',
+    'Lake Monster': 'Under black water, something turns once—slow—like an eye refusing to close.',
+    'The Antlered Thing': 'Antlers scrape the dark itself. The vow is pinned there like cloth on a nail.'
+  };
+  return lines[c] || 'The dark accepts what you offered. It does not give it back.';
+}
+
+if (sealBtn && signatureEl && finalLineEl){
+  sealBtn.addEventListener('click', () => {
+    if (document.body.classList.contains('sealed')) return;
+
+    document.body.classList.add('sealed');
+    sealBtn.disabled = true;
+
+    // darker, quieter: let the seal take the room
+    whisper('Sealed.');
+
+    // reveal a cryptid-specific last line
+    setTimeout(() => {
+      finalLineEl.textContent = lineForCryptid(chosenCryptid);
+    }, 900);
+
+    // burn-in the signature
+    const sigText = cleanHtmlToText(signatureEl.innerHTML);
+    signatureEl.classList.add('burning');
+    setTimeout(() => typewriter(signatureEl, sigText, 26), 700);
+  });
+}
+
+
+// ─── INIT ───
+window.addEventListener('resize', () => {
+  initStars();
+  // Don't reinit particles on resize to avoid jump
+  partCanvas.width = window.innerWidth;
+  partCanvas.height = document.documentElement.scrollHeight;
+});
+
+initStars();
+initParticles();
+setupReveal();
+setupMilestones();
+requestAnimationFrame(animate);
+
+// Recalc particle canvas height after content loads
+window.addEventListener('load', () => {
+  partCanvas.height = document.documentElement.scrollHeight;
+});
+</script>
+</body>
+</html>

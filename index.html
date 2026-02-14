@@ -1044,7 +1044,7 @@ body.sealed .relic{
       <div class="poetry-number reveal">Chapter One</div>
       <h2 class="poetry-heading reveal reveal-delay-1">The Black Ribbon</h2>
       <p class="poetry-text reveal reveal-delay-2">
-                When the world dresses itself in sweetness and calls it love, I think of you — <em class="candle-word">Brandon</em> — the truer thing. The one who never asked me to be bright, or easy, or harmless.<br><br>
+                When the world dresses itself in sweetness and calls it love, I think of you — <em class="candle-word">Brandon Wakeley</em> — the truer thing. The one who never asked me to be bright, or easy, or harmless.<br><br>
 How long since we first tied that <span class="relic" data-relic="A knot of black twine—warm from a pocket, damp with river-fog.">black ribbon</span> between us, not as a promise of goodness, but as an agreement to be honest? We were bound — not by convenience, not by a neat little oath — but by a gravity older than manners. The kind that pulls two souls toward the same locked <span class="relic" data-relic="The latch is cold. The wood is scratched from the inside.">door</span>… and makes them smile.
       </p>
     </div>
@@ -1462,7 +1462,7 @@ function ensureAudio(){
   const rumbleGain = audioCtx.createGain();
   rumbleOsc.type = 'sine';
   rumbleOsc.frequency.value = 42;
-  rumbleGain.gain.value = 0.014;
+  rumbleGain.gain.value = 0.06;
   rumbleOsc.connect(rumbleGain).connect(masterGain);
   rumbleOsc.start();
 
@@ -1502,7 +1502,7 @@ function ensureAudio(){
   windFilter.Q.value = 0.7;
 
   windGain = audioCtx.createGain();
-  windGain.gain.value = 0.007;
+  windGain.gain.value = 0.03;
 
   // Gentle movement in the wind
   const windLfo = audioCtx.createOscillator();
@@ -1521,11 +1521,19 @@ function enableSound(){
   if (!soundPref) return;
   ensureAudio();
   if (!audioCtx || !masterGain) return;
-  // resume is gesture-gated; we call it only from clicks
-  audioCtx.resume && audioCtx.resume();
+
+  // Safari/iOS can be finicky; keep trying to resume on user gestures.
+  try{
+    if (audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume();
+    else if (audioCtx.resume) audioCtx.resume();
+  }catch(_e){}
+
   soundOn = true;
   masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-  masterGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.15);
+  masterGain.gain.setTargetAtTime(0.28, audioCtx.currentTime, 0.15);
+}
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setTargetAtTime(0.28, audioCtx.currentTime, 0.15);
 }
 
 function disableSound(){
@@ -1565,7 +1573,7 @@ function whisperSfx(){
   src.connect(bp).connect(g).connect(masterGain);
 
   g.gain.setValueAtTime(0.0, t);
-  g.gain.linearRampToValueAtTime(0.05, t + 0.02);
+  g.gain.linearRampToValueAtTime(0.12, t + 0.02);
   g.gain.exponentialRampToValueAtTime(0.0001, t + d);
 
   src.start(t);
@@ -1577,6 +1585,12 @@ if (soundBtn){
     soundPref = !soundPref;
     localStorage.setItem('sound', soundPref ? 'on' : 'off');
     updateSoundBtn();
+
+// Extra safety: any tap/click will attempt to (re)unlock audio if the user has Sound ON.
+document.addEventListener('pointerdown', () => {
+  if (soundPref && !soundOn) enableSound();
+}, { passive: true });
+
     if (soundPref) enableSound();
     else disableSound();
   });
